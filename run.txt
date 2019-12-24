@@ -1,0 +1,3 @@
+docker run  -d --name unify-config -p 3000:80  -e MYSQL_ROOT_PASSWORD=123456  --restart always mysql-clickhouse:v1
+
+docker run  -d --name mysql-clickhouse -p 3308:3306 -p 8123:8123 -p 9000:9000 -p 9009:9009 -p 1883:1883 -p 8083:8083  -p 18083:18083  -v /data/mysql:/var/lib/mysql -v /data/clickhouse:/var/lib/clickhouse -e MYSQL_ROOT_PASSWORD=123456  --restart always mysql-clickhouse:v1
