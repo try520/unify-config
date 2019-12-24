@@ -78,7 +78,7 @@ module.exports = {
         port:8123,
         user:"",
         password:"",
-        clusterName:'default_cluster',
+        clusterName:'',
         clusterCount:3,
         basicAuth: null,
         isUseGzip: false,
