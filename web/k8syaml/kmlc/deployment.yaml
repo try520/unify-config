@@ -1,0 +1,89 @@
+metadata:
+  name: static-res
+  namespace: bigdata-prod
+  resourceVersion: '1448015'
+  labels:
+    app: static-res
+  annotations:
+    deployment.kubernetes.io/revision: '12'
+    desc: 静态资源服务，统一配置中心
+    displayName: static-res
+    kubesphere.io/isElasticReplicas: 'false'
+    kubesphere.io/relatedHPA: static-res
+    maxSurgePod: '1'
+    minAvailablePod: '1'
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: static-res
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: static-res
+    spec:
+      volumes:
+        - name: res
+          persistentVolumeClaim:
+            claimName: res
+        - name: upload-disk
+          persistentVolumeClaim:
+            claimName: upload-disk
+      containers:
+        - name: container-xbxaqo
+          image: 'harbor.devops.kubesphere.local:30280/kmlc/static-res:v2'
+          env:
+            - name: mqtt
+              value: |
+                {"host":"mqtt://192.168.12.6:30398"}
+            - name: redis
+              value: >
+                {"port":32741,"host":"192.168.12.6","password":"tiQAAy4R1s","db":1}
+            - name: StaticRes
+              value: >
+                {"port":30983,"host":"192.168.12.6","user":"root","pwd":"Kmlc3302133","dbName":"static_res","dialect":"mysql","dirName":"static-res","logging":true}
+            - name: clickHouse
+              value: >
+                {"url":"http://192.168.12.6","port":31731,"user":"kmlc","password":"Kmlc3302133","clusterName":"default_cluster","clusterCount":3,"basicAuth":null,"isUseGzip":false,"debug":false}
+            - name: frontWebConfig
+              value: >
+                {"mqtt":{"host":"192.168.12.6","port":31282,"auth":{"username":"admin","password":"public"}}}
+          resources:
+            limits:
+              cpu: '1'
+              memory: 2Gi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          volumeMounts:
+            - name: res
+              mountPath: /app/www/static/res
+            - name: disk
+              mountPath: /app/www/static/res/upload/disk
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      serviceAccountName: default
+      serviceAccount: default
+      securityContext: {}
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - node1
+      schedulerName: default-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0%
+      maxSurge: 100%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600

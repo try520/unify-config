@@ -1,0 +1,248 @@
+import appBaseInfo from "../config/_app-base-info.marko"
+
+<div>
+  <style>
+  .layui-tab-title .addTabBtn{position: absolute;right:5px}
+</style>
+  <div class="layui-tab layui-tab-brief ">
+    <ul class="layui-tab-title">
+      <li class="layui-this">基本信息</li>
+      <for|item| of=input.viewData.configItems>
+        <li ac_id=`${item.ac_id}`>
+          ${item.ac_name}<i class="layui-icon appItemcloseBtn" style="top:-1px;right:-5px" onclick=`delConfig('${item.ac_id}')`>&#x1007;</i>
+        </li>
+      </for>
+      <button name="addTabBtn" class="addTabBtn layui-btn layui-btn-sm layui-btn-danger">+</button>
+    </ul>
+    <div class="layui-tab-content">
+      <div class="layui-tab-item layui-show">
+        <form name="appAddForm" class="layui-form admin-container vertical" method="post" lay-filter="appEditForm" action="/manage/config/doAppEdit">
+          <${appBaseInfo} ...input.viewData.appInfo/>
+          <button name="formSubBtn" class="layui-btn" lay-submit lay-filter="formSubBtn">保存</button>
+        </form>
+      </div>
+      <for|item| of=input.viewData.configItems>
+        <div ac_id=`${item.ac_id}` class="layui-tab-item">
+          <form class="layui-form  vertical" method="post" action="doEditAppConfig">
+            <input type="hidden" name="ac_id" value=`${item.ac_id || ""}`/>
+            <input type="hidden" name="ac_appCode" value=`${item.ac_appCode || ""}`/>
+            <div class="layui-fluid">
+              <div class="layui-row layui-col-space20">
+                <div class="layui-col-md6">
+                  <div class="layui-row">
+                    <div class="layui-col-md6" style="padding-right:5px">
+                      <label>配置名称</label>
+                      <div class="layui-input-block">
+                        <input type="text" name="ac_name" required placeholder="配置中文名称" lay-verify="required" class="layui-input" lay-verType="tips" value=`${item.ac_name || ""}`/>
+                      </div>
+                    </div>
+                    <div class="layui-col-md6" style="padding-left:5px">
+                      <label>环境代码标示</label>
+                      <div class="layui-input-block">
+                        <input type="text" name="ac_env" required placeholder="环境应用标示（英文字符串）" lay-verify="required" class="layui-input" lay-verType="tips" value=`${item.ac_env || ""}`/>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="layui-form-item ">
+                    <div class="layui-input-block">
+                      <textarea type="jsonEditor" style="height:450px;line-height: 150%" name="ac_config" placeholder="请输入开发环境配置文件，json格式" class="layui-textarea">${item.ac_config || ""}</textarea>
+                    </div>
+                  </div>
+                </div>
+                <div class="layui-col-md6" style="">
+                  <div class="layui-col-md12" style="padding-bottom:5px">
+                    <span class="layui-badge layui-bg-black">URL:http://${input.viewData.host}/api/config/${input.viewData.appInfo.app_code}/${item.ac_env}</span>
+                    
+                  </div>
+                  <pre name="json-viewer" style="height:450px;overflow: auto;border: 1px solid #ddd;background-color:#f5f5f5"/>
+                </div>
+              </div>
+            </div>
+            
+            <div style="text-align:left;margin-top:10px;margin-left:10px">
+              <button name="condigSaveBtn" class="layui-btn" lay-submit lay-filter="EditConfigFormSubmit">保存</button>
+              <span style="margin-left:10px" class="layui-badge layui-bg-orange">配置修改后，将发MQTT消息到主题:static-res/configUpdate/${item.ac_appCode}/${item.ac_env}</span>
+            </div>
+          </form>
+        </div>
+      </for>
+    </div>
+    <div style="display: none" id="addConfigForm">
+      <form name="appAddForm" class="layui-form admin-container vertical" method="post" lay-filter="addConfigForm" action="/manage/config/doAppEdit">
+        <input type="hidden" name="ac_appCode" value=`${input.viewData.appInfo.app_code ? input.viewData.appInfo.app_code : ""}`/>
+        <div class="layui-form-item ">
+          <label class="form-label">应用名称</label>
+          <div class="layui-input-block">
+            <input type="text" name="ac_name" required lay-verify="required" placeholder="请输入环境应用名称" autocomplete="off" class="layui-input" lay-verType="tips"/>
+          </div>
+        </div>
+        <div class="layui-form-item ">
+          <label class="form-label">环境标示</label>
+          <div class="layui-input-block">
+            <input type="text" name="ac_env" required lay-verify="required" placeholder="请输入环境应用标示（英文字符串）" autocomplete="off" class="layui-input" lay-verType="tips"/>
+          </div>
+        </div>
+        <button style="display: none;" name="formSubBtn" class="layui-btn" lay-submit lay-filter="addConfigFormSubmit">隐藏的提交按钮</button>
+      </form>
+    </div>
+  </div>
+  <script>
+var appConfigAddWindowIndex;
+var jsonEditorHeight,jsonViewerHeight;
+
+    layui.use(['form'], function () {
+      layui.form.on('submit(addConfigFormSubmit)', function (data) {
+            $.post("doEditAppConfig",data.field,function(ret){
+                if(ret.Result===1){
+                    model=ret.Data;
+                  layui.layer.close(appConfigAddWindowIndex);
+                    appendConfigTab(model);
+                  layui.layer.msg('保存成功', {offset: 't',icon: 1});
+                }else{
+                  layui.layer.msg('保存失败', {offset: 't',icon: 5});
+                }
+            });
+
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        });
+
+      layui.form.on('submit(EditConfigFormSubmit)',function(data){
+          $.post("doEditAppConfig",data.field,function(ret){
+            if(ret.Result==1){
+              layui.layer.msg('保存成功', {offset: 't',icon: 1});
+            }else{
+              layui.layer.msg('保存失败', {offset: 't',icon: 5});
+            }
+          });
+          return false;
+        });
+       
+    });
+
+    var doJsonViewer=function(textAreaObj){
+      var jsonData={};
+      try{
+          jsonData=eval("("+textAreaObj.val()+")");
+      }catch(err){
+          return;
+      }
+      textAreaObj.parents(".layui-tab-item").find("[name='json-viewer']").JSONView(jsonData,{collapsed: true, withQuotes: true, withLinks: false});
+    };
+
+     $("[type='jsonEditor']").each(function (i,dom) {
+      doJsonViewer($(dom));
+    });
+
+    //textarea 内容改变时触发
+    $(document).on("input propertychange","[type='jsonEditor']",function(){
+        doJsonViewer($(this));
+        try{
+            var jsonText=$(this).val();
+            $(this).val(JSON.stringify(JSON.parse(jsonText), null, 4));
+        }catch (err) {
+            //console.log(err);
+            return;
+        }
+
+    });
+
+    Screen.OnReSize(function (ResizedWinWidth, ResizedWinHeight, scale) {
+      if(ResizedWinHeight>450){
+          jsonEditorHeight =ResizedWinHeight - 330;
+          jsonViewerHeight=jsonEditorHeight+45;
+          $("[type='jsonEditor']").height(jsonEditorHeight);
+          $("[name='json-viewer']").height(jsonViewerHeight);
+      }
+    });
+  
+
+    var appendConfigTab=function(item){
+      $(".layui-tab-title").append(`
+        <li ac_id="${item.ac_id}">
+          ${item.ac_name}<i class="layui-icon appItemcloseBtn" style="top:-1px;right:-5px" onclick="delConfig('${item.ac_id}')">&#x1007;</i>
+        </li>
+      `);
+      $(".layui-tab-content").append(`
+         <div ac_id="${item.ac_id}" class="layui-tab-item">
+          <form class="layui-form  vertical" method="post" action="doEditAppConfig">
+            <input type="hidden" name="ac_id" value="${item.ac_id}"/>
+            <input type="hidden" name="ac_appCode" value="${item.ac_appCode}"/>
+            <div class="layui-fluid">
+              <div class="layui-row layui-col-space20">
+                <div class="layui-col-md6">
+                  <div class="layui-row">
+                    <div class="layui-col-md6" style="padding-right:5px">
+                      <label>配置名称</label>
+                      <div class="layui-input-block">
+                        <input type="text" name="ac_name" required placeholder="配置中文名称" lay-verify="required" class="layui-input" lay-verType="tips" value="${item.ac_name}"/>
+                      </div>
+                    </div>
+                    <div class="layui-col-md6" style="padding-left:5px">
+                      <label>环境代码标示</label>
+                      <div class="layui-input-block">
+                        <input type="text" name="ac_env" required placeholder="环境应用标示（英文字符串）" lay-verify="required" class="layui-input" lay-verType="tips" value="${item.ac_env}"/>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="layui-form-item ">
+                    <div class="layui-input-block">
+                      <textarea type="jsonEditor" style="height:${jsonEditorHeight}px;line-height: 150%" name="ac_config" placeholder="请输入开发环境配置文件，json格式" class="layui-textarea">${item.ac_config}</textarea>
+                    </div>
+                  </div>
+                </div>
+                <div class="layui-col-md6" style="">
+                  <div class="layui-col-md12" style="padding-bottom:5px">
+                    <span class="layui-badge layui-bg-black">URL:http://${location.host}/api/config/${item.ac_appCode}/${item.ac_env}</span>
+                  </div>
+                  <pre name="json-viewer" style="height:${jsonViewerHeight}px;overflow: auto;border: 1px solid #ddd;background-color:#f5f5f5"/>
+                </div>
+              </div>
+            </div>
+            <div style="text-align:left;margin-top:10px;margin-left:10px">
+              <button name="condigSaveBtn" class="layui-btn" lay-submit lay-filter="EditConfigFormSubmit">保存</button>
+            </div>
+          </form>
+        </div>
+      `);
+    };
+
+    
+
+    var delConfig=function(id){
+      layui.layer.confirm('是否删除?', {icon: 3, title:'询问'}, function(index){
+        $.post("doDelAppConfig",{id:id},function(ret){
+          if(ret.Result==1){
+            $("[ac_id='"+id+"']").remove();
+
+          }else{
+            layui.layer.msg('删除失败', {offset: 't',icon: 5});
+          }
+        })
+        layui.layer.close(index);
+      });
+    };
+
+    $("[name='addTabBtn']").click(function () {
+      layui.layer.open({
+            type: 1,
+            area: ['500px', '280px'],
+            title: ['添加配置', 'font-size:18px;'],
+            content: $('#addConfigForm').html(),
+            success: function (layero,index) {
+                appConfigAddWindowIndex=index;
+              layui.form.render(null,"addConfigForm");
+            },
+            btn: ["确定", "取消"],
+            yes: function (index, layero) {
+                layero.find("[name='formSubBtn']").click();
+                return false;
+            },
+            btn2: function (index, layero) {
+              layui.layer.close(index);
+            }
+        });
+    });
+
+
+</script>
+</div>

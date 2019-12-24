@@ -1,0 +1,46 @@
+<div class="layui-container" style="margin:100px auto;width:80%">
+  <div class="layui-row">
+    <div class="layui-col-md6" style="padding:10px">
+      <div style="background:#eee;height:150px;padding:20px;text-align:center">
+        <i class="layui-icon" style="font-size:4.0rem;color:#1E9FFF">&#xe681;</i>
+        <p>导入存储在本地的JSON文件,进行数据恢复</p>
+        <br/>
+        <button name="importBtn" class="layui-btn layui-btn-normal layui-btn-sm">恢复</button>
+      </div>
+    </div>
+    <div class="layui-col-md6" style="padding:10px">
+      <div style="background:#eee;height:150px;padding:20px;text-align:center">
+        <i class="layui-icon" style="font-size:4.0rem;color:#1E9FFF">&#xe601;</i>
+        <p>导出所有应用的配置并存储到本地，进行数据备份</p>
+        <br/>
+        <a class="layui-btn layui-btn-normal layui-btn-sm" href="exportConfig" target="_blank">备份</a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+layui.use('upload', function(){
+  var upload = layui.upload;
+   
+  //执行实例
+  var uploadInst = upload.render({
+    elem: "[name='importBtn']" //绑定元素
+    ,url: 'recovery' //上传接口
+    ,accept:"file"
+    ,exts:"json|txt"
+    ,field:"upfile"
+    ,done: function(res){
+      //上传完毕回调
+      if(res.Result==1){
+        layer.msg('配置恢复成功', {offset: 't',icon: 1});
+      }else{
+        layer.msg('配置恢复失败', {offset: 't',icon: 5});
+      }
+    }
+    ,error: function(){
+      //请求异常回调
+      layer.msg('请求异常', {offset: 't',icon: 5});
+    }
+  });
+});
+</script>

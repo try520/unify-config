@@ -1,0 +1,29 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: static-server
+  namespace: kmjy
+  selfLink: /api/v1/namespaces/kmjy/services/static-server
+  uid: c7a29275-54eb-11e9-9de3-52540f629c3a
+  resourceVersion: '734016'
+  creationTimestamp: '2019-04-02T02:05:25Z'
+  labels:
+    name: static-server
+  annotations:
+    creator: admin
+    desc: ''
+spec:
+  ports:
+    - name: web
+      protocol: TCP
+      port: 3001
+      targetPort: 3001
+      nodePort: 31786
+  selector:
+    name: static-server
+  clusterIP: 10.96.216.107
+  type: NodePort
+  sessionAffinity: None
+  externalTrafficPolicy: Cluster
+status:
+  loadBalancer: {}

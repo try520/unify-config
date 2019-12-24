@@ -1,0 +1,22 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: static-server
+  namespace: bigdata-prod
+  labels:
+    name: static-server
+spec:
+  ports:
+    - name: web
+      protocol: TCP
+      port: 3001
+      targetPort: 3001
+      nodePort: 31786
+  selector:
+    name: static-server
+  clusterIP: 10.96.216.107
+  type: NodePort
+  sessionAffinity: None
+  externalTrafficPolicy: Cluster
+status:
+  loadBalancer: {}

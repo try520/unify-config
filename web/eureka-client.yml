@@ -1,0 +1,19 @@
+eureka:
+  host: 'eureka'
+  port: 8010
+  servicePath: '/eureka/apps/'
+instance:
+  instanceId: 'PUSH-SERVER-MQTTPUSH'
+  name: 'PUSH-SERVER-MQTTPUSH'
+  app: 'PUSH-SERVER-MQTTPUSH'
+  hostName: 'PUSH-SERVER-MQTTPUSH'
+  ipAddr: '172.30.216.188'
+  statusPageUrl: 'http://172.30.216.188:3001/base/info'
+  port:
+    '$': 3001
+    '@enabled': 'true'
+  vipAddress: 'PUSH-SERVER-MQTTPUSH'
+  dataCenterInfo:
+    '@class': 'com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo'
+    name: 'MyOwn'
+#172.30.216.188

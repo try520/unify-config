@@ -1,0 +1,12 @@
+{
+    "name": "clickhouse",
+    "description": "",
+    "version": "0.0.1",
+    "private": true,
+    "author": {
+        "name": "田林",
+        "email": "34492114@qq.com"
+    },
+    "main": "./index"
+
+}

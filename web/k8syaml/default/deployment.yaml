@@ -1,0 +1,105 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: static-server
+  namespace: kmjy
+  selfLink: /apis/apps/v1/namespaces/kmjy/deployments/static-server
+  uid: 3603d804-54e9-11e9-9de3-52540f629c3a
+  resourceVersion: '14424331'
+  generation: 26
+  creationTimestamp: '2019-04-02T01:47:02Z'
+  labels:
+    name: static-server
+  annotations:
+    creator: admin
+    deployment.kubernetes.io/revision: '24'
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: static-server
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        name: static-server
+    spec:
+      volumes:
+        - name: res
+          nfs:
+            server: 10.9.152.28
+            path: /mnt/res
+        - name: disk
+          nfs:
+            server: 10.9.152.14
+            path: /mnt/upload_disk
+      containers:
+        - name: static-server
+          image: '10.9.152.252:80/kmjy/static-server:v2'
+          command:
+            - npm
+          args:
+            - start
+            - micro
+          ports:
+            - name: web
+              containerPort: 3001
+              protocol: TCP
+          env:
+            - name: mqtt
+              value: |
+                {"host":"mqtt://192.168.12.6:30398"}
+            - name: redis
+              value: >
+                {"port":32741,"host":"192.168.12.6","password":"tiQAAy4R1s","db":1}
+            - name: StaticRes
+              value: >
+                {"port":30983,"host":"192.168.12.6","user":"root","pwd":"Kmlc3302133","dbName":"static_res","dialect":"mysql","dirName":"static-res","logging":true}
+            - name: clickHouse
+              value: >
+                {"url":"http://192.168.12.6","port":31731,"user":"kmlc","password":"Kmlc3302133","clusterName":"default_cluster","clusterCount":3,"basicAuth":null,"isUseGzip":false,"debug":false}
+            - name: frontWebConfig
+              value: >
+                {"mqtt":{"host":"192.168.12.6","port":31282,"auth":{"username":"admin","password":"public"}}}
+          resources: {}
+          volumeMounts:
+            - name: res
+              mountPath: /app/www/static/res
+            - name: disk
+              mountPath: /app/www/static/res/upload/disk
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      imagePullSecrets:
+        - name: harbor
+      schedulerName: default-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
+status:
+  observedGeneration: 26
+  replicas: 1
+  updatedReplicas: 1
+  readyReplicas: 1
+  availableReplicas: 1
+  conditions:
+    - type: Available
+      status: 'True'
+      lastUpdateTime: '2019-06-04T03:51:37Z'
+      lastTransitionTime: '2019-06-04T03:51:37Z'
+      reason: MinimumReplicasAvailable
+      message: Deployment has minimum availability.
+    - type: Progressing
+      status: 'True'
+      lastUpdateTime: '2019-06-04T03:56:41Z'
+      lastTransitionTime: '2019-04-02T01:47:02Z'
+      reason: NewReplicaSetAvailable
+      message: ReplicaSet "static-server-78ff557df9" has successfully progressed.

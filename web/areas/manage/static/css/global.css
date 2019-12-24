@@ -1,0 +1,43 @@
+body {
+    padding: 0px;
+    background: #fff
+}
+
+.layui-layout-admin .layui-logo {
+    font-size: 1.4rem;
+    color: #fff;
+    ;
+}
+
+.admin-container {
+    padding: 10px
+}
+
+.layui-form.vertical .form-label {
+    display: block;
+    font-weight: 400;
+    line-height: 25px;
+    text-align: left;
+}
+
+.layui-form.vertical .form-label .form-action {
+    float: right;
+    color: orangered
+}
+
+.layui-form.vertical .layui-input-block {
+    margin-left: 0px
+}
+
+.layui-input,
+.layui-select,
+.layui-textarea {
+    height: 30px;
+    line-height: 1.0;
+    line-height: 30px\9;
+    border-width: 1px;
+    border-style: solid;
+    background-color: #fff;
+    border-radius: 2px;
+
+}

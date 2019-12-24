@@ -1,0 +1,17 @@
+define({
+  "name": "静态资源服务 WebApi 文档",
+  "version": "1.0.0",
+  "description": "欢迎阅读 静态资源服务 WebApi 文档",
+  "title": "静态资源服务接口文档",
+  "url": "http://127.0.0.1:3001/",
+  "sampleUrl": "/",
+  "order": [],
+  "defaultVersion": "0.0.0",
+  "apidoc": "0.3.0",
+  "generator": {
+    "name": "apidoc",
+    "time": "2019-07-19T08:37:07.646Z",
+    "url": "http://apidocjs.com",
+    "version": "0.17.7"
+  }
+});

@@ -1,0 +1,188 @@
+import appBaseInfo from "../config/_app-base-info.marko"
+<div class="layui-side-scroll">
+    <ul name="appItems" class="layui-nav layui-nav-tree" lay-filter="appItems">
+
+        <for|item| of=input.viewData.appLabels>
+        <li app_label=`${item}` class="layui-nav-item">
+            <a class="" href="javascript:;">${item}</a>
+            <dl class="layui-nav-child">
+                <for|app| of=input.viewData.appItems>
+                <if(app.app_label == item)>
+                <dd name="appItem" app_id=`${app.app_id}` app_label=`${app.app_label}` style="position:relative">
+                    <a href=`javascript:void(0);`>${app.app_name}</a>
+                    <i class="layui-icon appItemcloseBtn" onclick=`delAppItem('${app.app_label}','${app.app_id}')`>&#x1007;</i>
+                </dd>
+                </if>
+                </for>
+            </dl>
+        </li>
+        </for>
+        <li name="addAppBtnLi" style="padding:10px">
+            <button name="addAppBtn" onclick="openAppEditWindow()" class="layui-btn layui-btn-fluid">
+                <i class="layui-icon">&#xe654;</i> 添加应用
+            </button>
+        </li>
+    </ul>
+</div>
+<!-- App信息修改表单 -->
+<div style="display: none" id="appAddForm">
+    <form name="appAddForm" class="layui-form admin-container vertical" method="post" lay-filter="appAddForm" action="/manage/config/doAppEdit">
+        <${appBaseInfo}/>
+        <button style=`display: none;` name="formSubBtn" class="layui-btn" lay-submit lay-filter="formSubBtn">立即提交</button>
+    </form>
+</div>
+<!-- App信息修改表单 Over -->
+<script type="text/javascript">
+    layui.use(['form', 'layer', 'element'], function () {
+        // appItems.element = layui.element;
+        // appItems.layer = layui.layer;
+        // appItems.form = layui.form;
+        doEvent();
+    });
+
+    var doEvent = function () {
+        layui.form.on('submit(formSubBtn)', function (data) {
+            $.post("doAppEdit",data.field,function(ret){
+                if(ret.Result===1){
+                    model=ret.Data;
+                    var labelLiDom=$("[name='appItems']").find("li[app_label='"+model.app_label+"']");
+                    var itemDom=$("[name='appItems']").find("[app_id='"+model.app_id+"']");
+                    var oldLabel=itemDom.attr("app_label");
+                    if(itemDom.length>0){
+                        //已经存在
+                        if(oldLabel==model.app_label){
+                            itemDom.find("a").text(model.app_name);
+                        }else{
+                            itemDom.remove();
+                            if($("[name='appItems']").find("li[app_label='"+oldLabel+"']").find("dd").length==0){
+                                $("[name='appItems']").find("li[app_label='"+oldLabel+"']").remove();
+                            }
+                            appendAppItem(model);
+
+                        }
+
+                    }else{
+                        appendAppItem(model);
+                    }
+                    layui.element.render(null,"appItems");
+                    layui.layer.close(appEditWindowIndex);
+                    layui.layer.msg('保存成功', {offset: 't',icon: 1});
+                }else{
+                    layui.layer.msg('保存失败', {offset: 't',icon: 5});
+                }
+            });
+
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        });
+
+        layui.form.verify({
+            appcode:function (value,dom) {
+                let msg;
+                let appId=$(dom).parents("form").find("[name='app_id']").val();
+                console.log("appId");
+                $.ajax({
+                    type: "POST",
+                    async:false,
+                    url:"doCheckAppCode",
+                    data:"appCode="+value+"&appId="+appId,
+                    success:function (ret) {
+
+                        if(ret.Result==0) {
+                            msg="应用编码已存在，请更换";
+                        }
+                    }
+                });
+                return msg;
+            }
+        });
+
+
+    };
+
+    var appendAppItem=function(model){
+        var labelLiDom=$("[name='appItems']").find("li[app_label='"+model.app_label+"']");
+        if(labelLiDom.length>0){
+            labelLiDom.find("dl").append(`
+            <dd app_id="${model.app_id}" app_label="${model.app_label}">
+                <a href="javascript:getAppInfo('${model.app_id}');">${model.app_name}</a>
+                <i class="layui-icon appItemcloseBtn" onclick="delAppItem('${model.app_label}','${model.app_id}')">&#x1007;</i>
+            </dd>
+          `);
+        }else{
+            $("[name='appItems']").find("[name='addAppBtnLi']").before(`
+            <li app_label="${model.app_label}" class="layui-nav-item">
+                <a class="" href="javascript:;">${model.app_label}</a>
+                <dl class="layui-nav-child">
+                <dd app_id="${model.app_id}" app_label="${model.app_label}" style="position:relative">
+                 <a href="javascript:getAppInfo('${model.app_id}');">${model.app_name}</a>
+                 <i class="layui-icon appItemcloseBtn" onclick="delAppItem('${model.app_label}','${model.app_id}')">&#x1007;</i>
+                </dd>
+                </dl>
+            </li>
+          `)
+        }
+    }
+
+    var delAppItem=function(appLabel,appId){
+        layui.layer.confirm('是否删除?', {icon: 3, title:'询问'}, function(index){
+            $.post("delApp",{id:appId},function(ret){
+                if(ret.Result==1){
+                    var curDom=$("[name='appItems']").find("[app_id='"+appId+"']");
+                    var nextDom=curDom.next();
+                    var prevDom=curDom.prev();
+                    var nextAppId="";
+                    if(nextDom.length>0){
+                        nextAppId=nextDom.attr("app_id");
+                    }else if(prevDom.length>0){
+                        nextAppId=prevDom.attr("app_id");
+                    }
+
+                    curDom.remove();
+                    if($("[name='appItems']").find("li[app_label='"+appLabel+"']").find("dd").length==0){
+                        $("[name='appItems']").find("li[app_label='"+appLabel+"']").remove();
+                    }
+
+                    if(nextAppId!=''){
+                        $("[name='appItems']").find("[app_id='"+nextAppId+"']").find("a").click();
+                        getAppInfo(nextAppId);
+                    }
+
+                }else{
+                    layui.layer.msg('删除失败', {offset: 't',icon: 5});
+                }
+            })
+            layui.layer.close(index);
+        });
+    };
+
+    var openAppEditWindow = function (appId) {
+
+        layui.layer.open({
+            type: 1,
+            area: ['500px', '430px'],
+            title: ['编辑应用信息', 'font-size:18px;'],
+            // content: ['appEdit?id='+appId, 'no'],
+            content: $('#appAddForm').html(),
+            success: function (layero,index) {
+                appEditWindowIndex=index;
+                if(appId){
+                    layero.find("[name='app_id']").val(appId);
+                }
+                layui.form.render(null,"appAddForm");
+            },
+            btn: ["确定", "取消"],
+            yes: function (index, layero) {
+                layero.find("[name='formSubBtn']").click();
+                // console.log(layero.find("input").val(2222))
+                // var body = layer.getChildFrame('body', index);
+                // var iframeWin = window[layero.find('iframe')[0]['name']]; //得到iframe页的窗口对象，执行iframe页的方法：iframeWin.method();
+                // // console.log(body.html()); //得到iframe页的body内容
+                // body.find('button').click();
+                return false;
+            },
+            btn2: function (index, layero) {
+                layer.close(index);
+            }
+        });
+    };
+</script>

@@ -1,0 +1,12 @@
+{
+    "name": "webtools",
+    "description": "",
+    "version": "0.0.1",
+    "private": true,
+    "author": {
+        "name": "田林",
+        "email": ""
+    },
+    "main": "./index"
+
+}

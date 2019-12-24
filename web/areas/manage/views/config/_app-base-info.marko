@@ -1,0 +1,40 @@
+<div>
+  <input type="hidden" name="app_id" value=`${input.app_id ? input.app_id : ""}`/>
+  <div class="layui-form-item ">
+    <label class="form-label">
+      应用名称
+      <span class="form-action"/>
+    </label>
+    <div class="layui-input-block">
+      <input type="text" name="app_name" required lay-verify="required" placeholder="请输入应用名称" autocomplete="off" class="layui-input" lay-verType="tips" value=`${input.app_name ? input.app_name : ""}`/>
+    </div>
+  </div>
+  <div class="layui-form-item ">
+    <label class="form-label">
+      应用编码
+      <span class="form-action"/>
+    </label>
+    <div class="layui-input-block">
+      <input type="text" name="app_code" required lay-verify="required|appcode" placeholder="请输入应用编码" autocomplete="off" class="layui-input" lay-verType="tips" value=`${input.app_code ? input.app_code : ""}`/>
+    </div>
+  </div>
+
+  <div class="layui-form-item ">
+    <label class="form-label">
+      应用分类
+      <span class="form-action"/>
+    </label>
+    <div class="layui-input-block">
+      <input type="text" name="app_label" required lay-verify="required" placeholder="请输入应用名称" autocomplete="off" class="layui-input" lay-verType="tips" value=`${input.app_label ? input.app_label : ""}`/>
+    </div>
+  </div>
+  <div class="layui-form-item ">
+    <label class="form-label">
+      排序
+      <span class="form-action"/>
+    </label>
+    <div class="layui-input-block">
+      <input type="text" name="app_order" required lay-verify="required|number" placeholder="请输入排序数字" class="layui-input" lay-verType="tips" value=`${input.app_order ? input.app_order : 0}`/>
+    </div>
+  </div>
+</div>

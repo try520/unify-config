@@ -1,0 +1,14 @@
+{
+    "apps": [
+        {
+        "autorestart": true,
+        "exec_mode":"fork",
+        "name": "static-res",
+        "cwd": "./", 
+        "script": "./bin/www", 
+        "env": {
+            "NODE_ENV": "prod" 
+            }
+        }
+    ]
+}

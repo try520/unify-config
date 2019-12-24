@@ -1,0 +1,90 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+const params = process.argv.splice(2); //获取命令中带入的参数
+let NODE_ENV = params[0]; //项目名称
+global.NODE_ENV = NODE_ENV || process.env.NODE_ENV || "dev"; //开发环境
+require("../global");
+const cluster = require("cluster");
+const sysConfig =  global.Config;
+//const net = require('net');
+//const farmhash = require('farmhash');
+const webScoket =require('./web-socket');
+const port = process.env.port || sysConfig.port;
+
+const startUp = require('../startup');
+const workerNum = sysConfig.clusterWorkerNum || require('os').cpus().length;
+let workers = [];
+
+log.info("当前模式:" + global.NODE_ENV);
+
+
+
+let getHttpServer = function (app,port) {
+    if (sysConfig.isHttps) {
+       return require('./https').init(app,port).createServer();
+    } else {
+       return require('./http').init(app,port).createServer();
+    }
+};
+
+
+
+if (workerNum > 1) { //具体参考 https://github.com/elad/node-cluster-socket.io
+    if (cluster.isMaster) {
+        log.info('Web服务端口：'+port);
+        log.info('将启动应用进程数：', workerNum);
+        startUp.init();
+        let spawn = function (i) {
+            let worker = cluster.fork();
+            workers[i] = worker;
+            workers[i].on('exit', function (worker, code, signal) {
+                console.log('respawning worker', i);
+                spawn(i);
+            });
+        };
+        for (let i = 0; i < workerNum; i++) {
+            spawn(i);
+        }
+
+        // let worker_index = function (ip, len) {
+        //     return farmhash.fingerprint32(ip) % len; // Farmhash is the fastest and works with IPv6, too
+        // };
+
+        // net.createServer({pauseOnConnect: true}, function (connection) {
+        //     let worker = workers[worker_index(connection.remoteAddress, workerNum)];
+        //     worker.send('sticky-session:connection', connection);
+        // }).listen(port);
+    } else {
+        let app = require('../app');
+        let server = getHttpServer(app,port);
+       // webScoket.init(server);
+
+        // process.on('message', function (message, connection) {
+        //     if (message !== 'sticky-session:connection') {
+        //         return;
+        //     }
+        //     server.emit('connection', connection);
+        //     connection.resume();
+        // });
+    }
+} else {
+    log.info('Web服务端口：'+port);
+    startUp.init();
+    let app = require('../app');
+   let server = getHttpServer(app,port);
+   // webScoket.init(server);
+}
+
+
+
+
+
+
+
+
+
+
+
