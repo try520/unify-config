@@ -50,7 +50,7 @@
                     if(userName=="" || pwd==""){
                         viewData.errInfo="账号和密码不能为空";
                     }else{
-                        if(userName=="admin" && pwd=="Kmlc3302133"){
+                        if(userName==Config.manage.username && pwd==Config.manage.pwd){
                             req.session.isLogin=true;
                             res.redirect('/manage/config/index');
                         }else{
