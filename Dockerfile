@@ -23,7 +23,6 @@ COPY ./web/config /app/config
 COPY ./web/areas /app/areas
 COPY ./web/logic /app/logic
 ADD ./profile /etc/profile
-RUN chmod a+x /redis-5.0.3/src/redis-server
 RUN dpkg -i /tools/clickhouse-server-base_1.1.54362_amd64.deb &&  dpkg -i /tools/clickhouse-server-common_1.1.54362_amd64.deb &&  dpkg -i /tools/clickhouse-client_1.1.54362_amd64.deb && dpkg -i /tools/emqx-debian8-v3.2.7_amd64.deb 
 RUN ln -s /node-v12.13.0-linux-x64/bin/node /usr/local/bin/node &&  ln -s /node-v12.13.0-linux-x64/bin/npm /usr/local/bin/npm && ln -s /etc/init.d/clickhouse-server /usr/local/bin/clickhouse-server && ln -s /redis-5.0.3/src/redis-server /usr/local/bin/redis-server
 RUN sed -i 's/\r//' /start.sh

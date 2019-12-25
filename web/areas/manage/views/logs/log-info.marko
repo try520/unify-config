@@ -1,0 +1,236 @@
+<style>
+    .filterContains{height:45px;border-bottom: 1px #ddd solid}
+    .levelContains{padding-left: 10px;line-height: 45px}
+    .levelContains > .layui-badge{margin-left: 10px;cursor: pointer;}
+    .logs{padding: 10px}
+    .logs .item {margin-bottom: 10px;position: relative;z-index: 1}
+    .logs .item .time{margin-left: 5px;position: relative;top:1px}
+    .logs .item .content{margin-left: 5px;position: relative;top:1px}
+    .controlBtns{position:fixed;z-index: 10;text-align: right;width:40px;}
+    .controlBtns .btn{margin:5px;display: inline-block; border-radius: 100%;background-color: #c0c0c0;cursor: pointer;width:40px;height: 40px;line-height: 40px;text-align: center}
+    .controlBtns .btn i{font-size: 1.5rem;color:#000}
+    .controlBtns .btn:hover{background-color: #009688;color:#fff}
+    .controlBtns .btn:hover i{color:#fff}
+</style>
+<div>
+
+    <div  class="layui-row">
+        <div class="layui-row filterContains">
+            <div class="layui-col-sm5 levelContains">
+                <span>Level:</span>
+                <span name="levelItem" active="layui-bg-black" class="layui-badge layui-bg-black">ALL</span>
+                <span name="levelItem" active="layui-bg-black" class="layui-badge layui-bg-gray">DEBUG</span>
+                <span name="levelItem" active="layui-bg-blue" class="layui-badge layui-bg-gray">INFO</span>
+                <span name="levelItem" active="layui-bg-orange" class="layui-badge layui-bg-gray">WARN</span>
+                <span name="levelItem" active="layui-badge" class="layui-badge layui-bg-gray">ERROR</span>
+                <span name="levelItem" active="layui-bg-cyan" class="layui-badge layui-bg-gray">FATAL</span>
+                <span name="levelItem" active="layui-bg-green" class="layui-badge layui-bg-gray">MARK</span>
+            </div>
+            <div class="layui-col-sm7 levelContains " >
+                <input type="text" class="layui-input" id="timeSpan" style="float: right;width: 300px;margin:6px 10px 0px 0px ">
+                <span style="float: right">时间段：</span>
+            </div>
+            <div name="logsContains" class="layui-col-sm12 layui-side-scroll" style="padding: 10px">
+                <ul name="logs" class="logs layui-timeline"></ul>
+                <div class="controlBtns" style="top:120px;right:30px;">
+                    <a name="moreBtn" class="btn">More</a>
+                </div>
+                <div class="controlBtns" style="bottom:60px;right:30px;">
+                    <a class="btn"><i class="  layui-icon layui-icon-fonts-clear"></i> </a>
+                    <a class="btn" name="playBtn" ><i class=" layui-icon layui-icon-play"></i> </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/html" id="logsItemTmpl">
+        <li class="layui-timeline-item item">
+            <i class="layui-icon layui-timeline-axis"></i>
+            <div class="layui-timeline-content layui-text">
+                <h3 class="layui-timeline-title">
+                    {{if logLevel.toLowerCase()=="debug"}}
+                    <span class="layui-badge layui-bg-black">{{logLevel.toUpperCase()}}</span>
+                    {{else if logLevel.toLowerCase()=="info" }}
+                    <span class="layui-badge layui-bg-blue">{{logLevel.toUpperCase()}}</span>
+                    {{else if logLevel.toLowerCase()=="warn" }}
+                    <span class="layui-badge layui-bg-orange">{{logLevel.toUpperCase()}}</span>
+                    {{else if logLevel.toLowerCase()=="error" }}
+                    <span class="layui-badge">{{logLevel.toUpperCase()}}</span>
+                    {{else}}
+                    <span class="layui-badge layui-bg-cyan">{{logLevel.toUpperCase()}}</span>
+                    {{/if}}
+                    <span class="time layui-badge layui-bg-gray">{{createTime}}</span>
+                </h3>
+                <p>
+                    {{content}}
+                </p>
+            </div>
+        </li>
+    </script>
+    <script type="text/javascript">
+        var appInfo=${JSON.stringify(input.appInfo)};
+        var curPage=0;
+        var curLevel="";
+        var beginTime=moment().format("YYYY-MM-DD 00:00:00");
+        var endTime=moment().add(1, 'd').format("YYYY-MM-DD 00:00:00");
+        var topic=`logs/${appInfo.app_code}/+`;
+        layui.use(['laydate'], function(){
+            layui.laydate.render({
+                elem: '#timeSpan' //指定元素
+                ,type: 'datetime'
+                ,range: true
+                ,value:`${beginTime} - ${endTime}`
+                ,done: function(value, date, endDate){
+                    console.log(value); //得到日期生成的值，如：2017-08-18
+                    console.log(date); //得到日期时间对象：{year: 2017, month: 8, date: 18, hours: 0, minutes: 0, seconds: 0}
+                    console.log(endDate); //得结束的日期时间对象，开启范围选择（range: true）才会返回。对象成员同上。
+                    let dateArray=value.split(' - ');
+                    beginTime=dateArray[0];
+                    endTime=dateArray[1];
+                    FillLogData(1);
+                }
+            });
+
+        });
+        $(function () {
+            bindEvent();
+            FillLogData();
+
+            Screen.OnReSize(function (ResizedWinWidth, ResizedWinHeight, scale) {
+                if(ResizedWinHeight>450){
+                    let height =ResizedWinHeight - 169;
+                    $("[name='logsContains']").height(height);
+                }
+            });
+
+
+        });
+
+
+        function bindEvent() {
+            $("[name='levelItem']").click(function () {
+                curLevel=$(this).text().toLowerCase();
+                if(curLevel=="all") curLevel="";
+                // $("[name='levelItem']").each(function () {
+                //     $(this).removeClass($(this).attr("active"))
+                // });
+                $("[name='levelItem']").addClass("layui-bg-gray");
+                $(this).removeClass("layui-bg-gray");
+                $(this).addClass($(this).attr("active"));
+                FillLogData(1);
+            });
+
+            $("[name='playBtn']").click(function () {
+                if($(this).find("i").hasClass("layui-icon-pause")){
+                    $(this).find("i").removeClass("layui-icon-pause");
+                    $(this).find("i").addClass("layui-icon-play");
+                    unBindMsgHander();
+                }else{
+                    $(this).find("i").removeClass("layui-icon-play");
+                    $(this).find("i").addClass("layui-icon-pause");
+                    bindMsgHander();
+                }
+            });
+
+            $("[name='moreBtn']").click(function () {
+                let curObj=$(this);
+                curObj.html(`<i class="layui-icon layui-icon-loading layui-icon layui-anim layui-anim-rotate layui-anim-loop"></i>`);
+                FillLogData(curPage+1,50,true,function () {
+                    curObj.html("More");
+                });
+            })
+        }
+
+        function FillLogData(_curPage,pageSize=50,isLoadMore=false,cb) {
+            curPage=_curPage;
+
+            let postData={
+                appCode:appInfo.app_code,
+                curPage:curPage,
+                pageSize:pageSize,
+                level:curLevel,
+                beginTime:beginTime,
+                endTime:endTime
+            };
+            if(!isLoadMore){
+                $("[name='logs']").html(`<div style="text-align: center;margin-top: 20px"><i class="layui-icon layui-icon-loading layui-icon layui-anim layui-anim-rotate layui-anim-loop"></i></div>`);
+            }
+            $.post("getLogs",postData,function (ret) {
+
+                if(ret.Result==1 && ret.Data.length>0){
+                    if(isLoadMore){
+                        let _list=[];
+                        for(let i=0;i<ret.Data.length;i++){
+                            _list.splice(0,ret.Data[i]);
+                        }
+                        for(let i=0;i<_list.length;i++){
+                            let interText = template("logsItemTmpl",ret.Data[i]);
+                            $("[name='logs']").prepend(interText);
+                        }
+                    }else{
+                        $("[name='logs']").html("");
+                        for(let i=0;i<ret.Data.length;i++){
+                            let interText = template("logsItemTmpl",ret.Data[i]);
+                            $("[name='logs']").append(interText);
+                        }
+                    }
+
+                }else{
+                    if(isLoadMore){
+                        if($("[name='logs']").html()==""){
+                            $("[name='logs']").html(`<div style="text-align: center;margin-top: 20px">暂无记录</div>`);
+                        }
+                    }else{
+                        $("[name='logs']").html(`<div style="text-align: center;margin-top: 20px">暂无记录</div>`);
+                    }
+
+                }
+                if(cb){
+                    cb();
+                };
+            });
+
+
+        }
+
+        function bindMsgHander(){
+
+            mqttClient.subscribe([topic], {
+                qos: 0,
+                onSuccess:function () {
+                    console.log(topic,"消息订阅成功");
+                },
+                onFailure:function () {
+                    console.log(topic,"消息订阅失败");
+                }
+            });
+            $(document).bind(topic, function (e, appCode,level,message) {
+                if(curLevel=="all"){
+                    let interText = template("logsItemTmpl",JSON.parse(message));
+                    $("[name='logs']").append(interText);
+                }else{
+                    if(curLevel==level){
+                        let interText = template("logsItemTmpl",JSON.parse(message));
+                        $("[name='logs']").append(interText);
+                    }
+                }
+
+            });
+        }
+
+        function unBindMsgHander() {
+            mqttClient.unsubscribe([topic],{
+                onSuccess:function () {
+                    console.log(topic,"取消订阅成功");
+                },
+                onFailure:function () {
+                    console.log(topic,"取消订阅失败");
+                }
+            });
+            $(document).unbind(topic);
+        }
+        
+
+
+
+    </script>
+</div>

@@ -1,0 +1,52 @@
+import layout from "../_share/_layout.marko"
+import appItems from "../config/app-items.marko"
+
+<${layout}>
+<@head>
+<title>统一日志</title>
+<link rel="stylesheet" href="/manage/static/css/index.css"/>
+<style>
+    .appItemcloseBtn{position: absolute;right:0px;top:3px;display:none;cursor: pointer;padding:2px;}
+    .layui-this .appItemcloseBtn{display:block}
+</style>
+</@head>
+<@body>
+<!-- 左侧导航区域 -->
+<div class="layui-side layui-bg-black">
+    <${appItems} ...input/>
+</div>
+<!-- 左侧导航区域 Over-->
+<!-- 内容主体区域 -->
+<div name="layui-body" class="layui-body"/>
+
+<script>
+
+
+    $(function () {
+        layui.use(['form', 'element'], function () {
+
+        });
+
+        $("[name='appItem']").on("click",function () {
+            let app_id=$(this).attr("app_id");
+            getLogInfo(app_id);
+        });
+
+    });
+
+
+
+
+
+
+    var getLogInfo=function (appId) {
+        $.get("logInfo?appId="+appId,function (html) {
+            $("[name='layui-body']").html(html);
+
+
+        })
+    }
+
+</script>
+</@body>
+</>
