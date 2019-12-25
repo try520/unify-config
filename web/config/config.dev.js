@@ -1,16 +1,16 @@
 module.exports = {
-    port: 3001,
-    upload: {
-        dir: '/upload/disk',
-        url: '/upload'
+    port:80,
+    upload:{
+        dir:'/upload/disk',
+        url:'/upload'
     },
-    uploadDir: 'disk',
-    clusterWorkerNum: 1, //应用运行的进程数，1：开启单进程模式，0：开启多进程模式，进程数=CPU数量，>1:开启多进程模式，数量为设置数量。多进程模式下，需要Redis的支持
-    isShareMemory: false, //是否使用共享内存，当是多进程模式时，isShareMemory=true，单进程模式时，可以为false或true
-    isHttps: false,
+    uploadDir:'disk',
+    clusterWorkerNum:1,//应用运行的进程数，1：开启单进程模式，0：开启多进程模式，进程数=CPU数量，>1:开启多进程模式，数量为设置数量。多进程模式下，需要Redis的支持
+    isShareMemory:false,//是否使用共享内存，当是多进程模式时，isShareMemory=true，单进程模式时，可以为false或true
+    isHttps:false,
     StaticRes: {
         host: "127.0.0.1",
-        port: "3307",
+        port: "3306",
         user: "root",
         pwd: "123456",
         dbName: "static_res",
@@ -18,28 +18,11 @@ module.exports = {
         dirName: "static-res",
         logging: true
     },
-    // StaticRes: {
-    //     host: "192.168.12.6",
-    //     port: "30983",
-    //     user: "admin",
-    //     pwd: "Kmlc3302133",
-    //     dbName: "static_res",
-    //     dialect: "mysql",
-    //     dirName: "static-res",
-    //     logging: true
-    // },
-    // redis: {
-    //     port: 32741, // Redis port
-    //     host: '192.168.12.6', // Redis host
-    //     family: 4, // 4 (IPv4) or 6 (IPv6)
-    //     password: 'tiQAAy4R1s',
-    //     db: 1
-    // },
     redis: {
         port: 6379, // Redis port
         host: '127.0.0.1', // Redis host
         family: 4, // 4 (IPv4) or 6 (IPv6)
-        password: '123456',
+        password: '',
         db: 1
     },
     log4js: {
@@ -69,20 +52,20 @@ module.exports = {
         },
         categories: {
             default: {
-                appenders: ['ruleConsole', 'ruleFile'],
-                level: 'all' //ALL<TRACE<DEBUG<INFO<WARN<ERROR<FATAL<MARK<OFF
+                appenders: ['ruleConsole','ruleFile'],
+                level: 'INFO' //ALL<TRACE<DEBUG<INFO<WARN<ERROR<FATAL<MARK<OFF
             },
             file: {
                 appenders: ['ruleFile'],
-                level: 'all'
+                level: 'INFO'
             }
         },
         replaceConsole: true,
-        pm2: true
+        pm2:true
     },
     mqtt: {
-        webApi: "http://192.168.12.6:32106/api/v2",
-        host: 'mqtt://192.168.12.6:30398',
+        webApi: "http://127.0.0.1:8080/api/v2",
+        host: 'mqtt://127.0.0.1:1883',
         qos2Items: 'message',
         auth: {
             username: 'admin',
@@ -91,12 +74,12 @@ module.exports = {
 
     },
     clickHouse:{
-        url: "http://192.168.12.6",
-        port:31731,
-        user:"kmlc",
-        password:"Kmlc3302133",
-        clusterName:'default_cluster',
-        clusterCount:3,
+        url: "http://127.0.0.1",
+        port:8123,
+        user:"",
+        password:"",
+        clusterName:'test_shard_localhost',
+        clusterCount:1,
         basicAuth: null,
         isUseGzip: false,
         debug: false
@@ -105,11 +88,13 @@ module.exports = {
     frontWebConfig:{
         mqtt:{
             host:"192.168.12.6",
-            port:31282,
+            port:8083,
             auth: {
                 username: 'admin',
                 password: 'public'
             }
         }
     }
+
 };
+

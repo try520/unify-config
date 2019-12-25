@@ -25,9 +25,10 @@ module.exports=class{
      * 初始化clickhouse 数据库中的表 如果没有 则创建
      */
     async initClickHouse(){
-        let clusterCount=this.config.clickHouse.clusterCount;
+        console.log("初始化clickhouse数据库");
+        let clusterCount=this.config.clickHouse.clusterCount || 1;
         
-
+   
         //创建库 每个集群点都要创建
         for(let i =0;i<clusterCount;i++){
             await clickHouse.app_log.createDataBase("static_res");

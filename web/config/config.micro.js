@@ -78,8 +78,8 @@ module.exports = {
         port:8123,
         user:"",
         password:"",
-        clusterName:'',
-        clusterCount:3,
+        clusterName:'test_shard_localhost',
+        clusterCount:1,
         basicAuth: null,
         isUseGzip: false,
         debug: false

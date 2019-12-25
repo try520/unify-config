@@ -1,5 +1,5 @@
 module.exports = {
-    port:3001,
+    port:80,
     upload:{
         dir:'/upload/disk',
         url:'/upload'
@@ -76,10 +76,10 @@ module.exports = {
     clickHouse:{
         url: "http://127.0.0.1",
         port:8123,
-        user:"kmlc",
-        password:"Kmlc3302133",
-        clusterName:'default_cluster',
-        clusterCount:3,
+        user:"",
+        password:"",
+        clusterName:'test_shard_localhost',
+        clusterCount:1,
         basicAuth: null,
         isUseGzip: false,
         debug: false
