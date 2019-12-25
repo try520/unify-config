@@ -3,6 +3,7 @@ module.exports = {
         username:"admin",
         pwd:"123456"
     },
+    
     port:80,
     upload:{
         dir:'/upload/disk',
