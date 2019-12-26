@@ -30,7 +30,7 @@ docker run  -d --name unify-config  -p 3000:80 -p 3308:3306 -p 8123:8123 -p 9000
 
 使用外部的数据持久化组件
 ```
-docker run  -d --name unify-config  -p 3000:80  -v /data/mysql:/var/lib/mysql -v /data/clickhouse:/var/lib/clickhouse -e mqtt {"host":"mqtt://192.168.12.6:30398"} -e  StaticRes {"port":3306,"host":"192.168.12.6","user":"root","pwd":"123456","dbName":"static_res","dialect":"mysql","dirName":"static-res","logging":true} -e clickHouse {"url":"http://192.168.12.6","port":31731,"user":"kmlc","password":"Kmlc3302133","clusterName":"default_cluster","clusterCount":3,"basicAuth":null,"isUseGzip":false,"debug":false} -e frontWebConfig {"mqtt":{"host":"192.168.12.6","port":31282,"auth":{"username":"admin","password":"public"}}} -e manage {"username":"admin","pwd":"123456"} --restart always unify-config:v1.0
+docker run  -d --name unify-config  -p 3000:80  -v /data/mysql:/var/lib/mysql -v /data/clickhouse:/var/lib/clickhouse -v /res:/app/www/res -v /upload:/app/www/upload -e mqtt {"host":"mqtt://192.168.12.6:30398"} -e  StaticRes {"port":3306,"host":"192.168.12.6","user":"root","pwd":"123456","dbName":"static_res","dialect":"mysql","dirName":"static-res","logging":true} -e clickHouse {"url":"http://192.168.12.6","port":31731,"user":"kmlc","password":"Kmlc3302133","clusterName":"default_cluster","clusterCount":3,"basicAuth":null,"isUseGzip":false,"debug":false} -e frontWebConfig {"mqtt":{"host":"192.168.12.6","port":31282,"auth":{"username":"admin","password":"public"}}} -e manage {"username":"admin","pwd":"123456"} --restart always unify-config:v1.0
 ```
 
 静态资源服务接口
