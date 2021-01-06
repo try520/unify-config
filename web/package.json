@@ -11,7 +11,7 @@
     "createApiDoc": "apidoc -i areas -o www/api-doc/content"
   },
   "dependencies": {
-    "axios": "^0.16.2",
+    "axios": "^0.21.1",
     "body-parser": "^1.17.2",
     "clickhouse": "^1.2.20",
     "cluster": "^0.7.7",
