@@ -26,7 +26,7 @@
     "install": "^0.11.0",
     "ioredis": "^4.3.0",
     "jimp": "^0.2.28",
-    "jsonwebtoken": "^8.4.0",
+    "jsonwebtoken": "^9.0.0",
     "log4js": "^3.0.6",
     "marko": "^4.13.5",
     "morgan": "^1.8.2",
